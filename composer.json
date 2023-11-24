@@ -1,0 +1,52 @@
+{
+    "name": "luan-tavares/data-transfer-object",
+    "license": "MIT",
+    "description": "Date checker for countries",
+    "keywords": [
+        "dto",
+        "data transfer object"
+    ],
+    "type": "library",
+    "authors": [
+        {
+            "name": "Luan Tavares Lourenço",
+            "email": "luan.tavares.lourenco@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "LTL\\DataTransferObject\\": "src/"
+        },
+        "files": []
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LTL\\Hubspot\\Tests\\": "tests/"
+        }
+    },
+    "bin": [],
+    "require": {
+        "php": "^8.2",
+        "luan-tavares/simple-deploy": "^1.0"
+    },
+    "require-dev": {
+        "larapack/dd": "1.*",
+        "phpunit/phpunit": "^10",
+        "illuminate/collections": "^9",
+        "infection/infection": "^0"
+    },
+    "scripts": {
+        "deploy-tag": [
+            "LTL\\Deploy\\DeployTag::execute"
+        ],
+        "deploy": [
+            "LTL\\Deploy\\Deploy::execute"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
+    }
+}
