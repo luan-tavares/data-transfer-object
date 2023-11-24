@@ -84,11 +84,10 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
         return $this->errors;
     }
 
-    public function error(string $field): string|null
+    public function hasErrors(): bool
     {
-        $this->{$field};
-
-        return @$this->errors[$field];
+        
+        return !is_null($this->errors);
     }
 
     public function setError(string $field, string $message): void
@@ -99,7 +98,7 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
             $this->errors = [];
         }
 
-        $this->errors[$field] = $message;
+        $this->errors[] = "{$field} - {$message}";
     }
 
     private function collection(): DTOCollection
