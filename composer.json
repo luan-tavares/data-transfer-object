@@ -1,7 +1,7 @@
 {
     "name": "luan-tavares/data-transfer-object",
     "license": "MIT",
-    "description": "Date checker for countries",
+    "description": "Simple DTO",
     "keywords": [
         "dto",
         "data transfer object"
