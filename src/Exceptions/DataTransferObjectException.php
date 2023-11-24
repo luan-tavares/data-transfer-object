@@ -10,14 +10,15 @@ class DataTransferObjectException extends Exception
     {
         $message = $this->messages;
         
-        if(is_array($this->messages)){
+        if(is_array($this->messages)) {
             $message = json_encode($message);
         }
         
         parent::__construct($message);
     }
 
-    public function errors(): array{
+    public function errors(): array|string
+    {
         return $this->messages;
     }
 }
