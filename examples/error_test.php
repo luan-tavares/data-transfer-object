@@ -34,11 +34,4 @@ class ExampleDTO extends DataTransferObject
 
 $example = new ExampleDTO([]);
 
-dd(
-    $example->filter(function ($field, $value) {
-        return is_numeric($value);
-    })->map(function ($field, $value) {
-        
-        return [0, 1, $value];
-    })->all()
-);
+list('a' => $a) = $example->all();
