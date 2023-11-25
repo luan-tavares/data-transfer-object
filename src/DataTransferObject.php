@@ -22,8 +22,14 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
     public function __construct(object|array $data)
     {
         set_error_handler(function ($severity, $message, $file, $line) {
-            throw new DataTransferObjectException($message);
-        }, E_WARNING | E_DEPRECATED);
+            if(error_reporting() === 0) {
+                return;
+            }
+
+            if(error_reporting() & $severity) {
+                throw new DataTransferObjectException($message);
+            }
+        });
 
         try {
             $this->resolve($data);
