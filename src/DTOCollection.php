@@ -12,7 +12,7 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
 {
     private array $data;
 
-    public function __construct(array $data = [])
+    public function __construct(private string $className, array $data = [])
     {
         $this->pushAll($data);
     }
@@ -54,45 +54,10 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
         $result = [];
         
         foreach ($this->data as $field => $value) {
-            $result[] = $callback($field, $value);
+            $result[$field] = $callback($field, $value);
         }
 
-        return new self($result);
-    }
-
-    /**
-     * @param Closure(string $field, mixed $value): array<string, mixed> $callback
-     */
-    public function mapWithKeys(Closure $callback): self
-    {
-        $result = [];
-
-        $i = 0;
-        
-        foreach ($this->data as $field => $value) {
-            $return = $callback($field, $value);
-
-            if($i === 0) {
-                $this->verifyMapWithKeys($return);
-            }
-
-            $result[key($return)] = current($return);
-            
-            $i++;
-        }
-
-        return new self($result);
-    }
-
-    private function verifyMapWithKeys($return): void
-    {
-        if(!is_array($return)) {
-            throw new DataTransferObjectException('Incorrect mapWithKeys(...) in '. static::class .'.');
-        }
-
-        if(count($return) !== 1) {
-            throw new DataTransferObjectException('Incorrect mapWithKeys(...) in '. static::class .'.');
-        }
+        return new self($this->className, $result);
     }
 
     /**
@@ -108,7 +73,7 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
             }
         }
 
-        return new self($result);
+        return new self($this->className, $result);
     }
 
     /**Iterator */
@@ -149,7 +114,7 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
 
     public function offsetSet($offset, $value): void
     {
-        throw new DataTransferObjectException("You can't add or change property  in ". static::class .'.');
+        throw new DataTransferObjectException("You can't add or change property  in {$this->className}");
     }
     
     public function offsetExists($offset): bool
@@ -159,13 +124,13 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
     
     public function offsetUnset($offset): void
     {
-        throw new DataTransferObjectException("You can't remove property  in ". static::class .'.');
+        throw new DataTransferObjectException("You can't remove property  in {$this->className}");
     }
     
     public function offsetGet($offset): mixed
     {
         if(!$this->offsetExists($offset)) {
-            throw new DataTransferObjectException("Property \"{$offset}\" does not exist in ". static::class .'.');
+            throw new DataTransferObjectException("Property \"{$offset}\" does not exist in {$this->className}");
         }
     
         return $this->data[$offset];

@@ -20,7 +20,7 @@ class ExampleDTO extends DataTransferObject
 
     protected function resolve(object|array $data)
     {
-        $this->a = $data->d;
+        $this->a = @$data->d;
 
         $this->b = 's';
 
@@ -33,5 +33,4 @@ class ExampleDTO extends DataTransferObject
 }
 
 $example = new ExampleDTO(new stdClass);
-
-list('a' => $a) = $example->all();
+dd($example);

@@ -15,9 +15,9 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
 {
     use Enumerable;
 
-    private array $fields = [];
-
     private array|null $errors = null;
+
+    private array $fields;
 
     public function __construct(object|array $data)
     {
@@ -46,7 +46,7 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
         foreach ($this->fields as $field) {
             try {
                 $this->{$field};
-            } catch(Error $error) {
+            } catch(Error) {
                 $notInitialized[] = $field;
             }
         }
@@ -70,6 +70,13 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
 
     abstract protected function resolve(object|array $data);
 
+    public function all(): array
+    {
+        $collection = $this->collection();
+        
+        return $collection->all();
+    }
+
     public static function fields(): array
     {
         $data = [];
@@ -92,7 +99,6 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
 
     public function hasErrors(): bool
     {
-        
         return !is_null($this->errors);
     }
 
@@ -108,7 +114,7 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
 
     private function collection(): DTOCollection
     {
-        $collection = new DTOCollection;
+        $collection = new DTOCollection(static::class);
 
         foreach ($this->fields as $field) {
             $collection->push($field, $this->{$field});
