@@ -69,7 +69,7 @@ abstract class DTOFactory
         $name = $property->name;
 
         if(!array_key_exists($name, $data)) {
-            throw new Error("Property \"{$name}\" was not initialized");
+            throw new Error('Property not initialized');
         }
 
         $value = $data[$name];
