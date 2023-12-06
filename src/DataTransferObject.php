@@ -7,6 +7,7 @@ use Error;
 use IteratorAggregate;
 use LTL\DataTransferObject\DTOCollection;
 use LTL\DataTransferObject\Exceptions\DataTransferObjectException;
+use LTL\DataTransferObject\Factories\DTOFactory;
 use LTL\DataTransferObject\Traits\Enumerable;
 use ReflectionClass;
 use ReflectionProperty;
@@ -17,45 +18,13 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
 
     private array|null $errors = null;
 
-    private array $fields;
-
-    public function __construct(object|array $data)
+    private function __construct()
     {
-        set_error_handler(function ($severity, $message, $file, $line) {
-            if(error_reporting() === 0) {
-                return;
-            }
+    }
 
-            if(error_reporting() & $severity) {
-                throw new DataTransferObjectException($message);
-            }
-        });
-
-        try {
-            $this->resolve($data);
-        } catch(Error $error) {
-            throw new DataTransferObjectException($error->getMessage());
-        }
-
-        restore_error_handler();
-
-        $this->fields = static::fields();
-
-        $notInitialized = [];
-       
-        foreach ($this->fields as $field) {
-            try {
-                $this->{$field};
-            } catch(Error) {
-                $notInitialized[] = $field;
-            }
-        }
-
-        if(!empty($notInitialized)) {
-            $notInitialized = implode(', ', $notInitialized);
-
-            throw new DataTransferObjectException("Properties \"{$notInitialized}\" was not initialized in ". static::class .'.');
-        }
+    public static function create(array $data): self
+    {
+        return DTOFactory::build($data, static::class);
     }
 
     public function __get($name)
@@ -67,8 +36,6 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
     {
         $this->{$name};
     }
-
-    abstract protected function resolve(object|array $data);
 
     public function all(): array
     {
@@ -102,14 +69,13 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
         return !is_null($this->errors);
     }
 
-    public function setError(string $message): void
+    public function setError(string $property, string $message): void
     {
-
         if(is_null($this->errors)) {
             $this->errors = [];
         }
 
-        $this->errors[] = $message;
+        $this->errors[$property] = $message;
     }
 
     private function collection(): DTOCollection

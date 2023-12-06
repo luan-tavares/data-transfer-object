@@ -5,6 +5,8 @@ require_once __DIR__ .'/__bootstrap.php';
 
 
 use LTL\DataTransferObject\DataTransferObject;
+use LTL\DataTransferObject\Examples\Test2Cast;
+use LTL\DataTransferObject\Examples\TestCast;
 
 class ExampleDTO extends DataTransferObject
 {
@@ -12,25 +14,14 @@ class ExampleDTO extends DataTransferObject
 
     public readonly string $b;
 
-    public readonly array $c;
-
-    public readonly int $d;
-
-    public readonly int $f;
-
-    protected function resolve(object|array $data)
-    {
-        $this->a = @$data->d;
-
-        $this->b = 's';
-
-        $this->c = [5];
-
-        $this->d = 88;
-
-        $this->f = 100;
-    }
+    #[TestCast]
+    public int $c;
 }
 
-$example = new ExampleDTO(new stdClass);
-dd($example);
+$example = ExampleDTO::create([
+    'a' => null,
+    'b' => '2',
+    'c' => 5
+]);
+
+dd($example, $example::fields());
