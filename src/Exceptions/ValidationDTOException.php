@@ -4,7 +4,7 @@ namespace LTL\DataTransferObject\Exceptions;
 
 use Exception;
 
-class CastDTOException extends Exception
+class ValidationDTOException extends Exception
 {
     public function __construct(private array|string $messages)
     {

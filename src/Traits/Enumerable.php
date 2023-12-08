@@ -36,4 +36,18 @@ trait Enumerable
         
         return $collection->filter($callback);
     }
+
+    public function only(string ...$fields): array
+    {
+        $collection = $this->collection();
+        
+        return $collection->only(...$fields);
+    }
+
+    public function except(string ...$fields): array
+    {
+        $collection = $this->collection();
+        
+        return $collection->except(...$fields);
+    }
 }

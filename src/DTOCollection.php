@@ -12,7 +12,7 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
 {
     private array $data;
 
-    public function __construct(private string $className, array $data = [])
+    public function __construct(array $data = [])
     {
         $this->pushAll($data);
     }
@@ -57,7 +57,7 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
             $result[$field] = $callback($field, $value);
         }
 
-        return new self($this->className, $result);
+        return new self($result);
     }
 
     /**
@@ -73,7 +73,29 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
             }
         }
 
-        return new self($this->className, $result);
+        return new self($result);
+    }
+
+    public function only(string ...$keys): array
+    {
+        $result = [];
+        
+        foreach ($keys as $key) {
+            $result[$key] = $this[$key];
+        }
+
+        return $result;
+    }
+
+    public function except(string ...$keys): array
+    {
+        $result = $this->data;
+        
+        foreach ($keys as $key) {
+            unset($result[$key]);
+        }
+
+        return $result;
     }
 
     /**Iterator */
@@ -114,7 +136,7 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
 
     public function offsetSet($offset, $value): void
     {
-        throw new DataTransferObjectException("You can't add or change property  in {$this->className}");
+        $this->data[$offset] = $value;
     }
     
     public function offsetExists($offset): bool
@@ -124,13 +146,13 @@ class DTOCollection implements Countable, Iterator, ArrayAccess
     
     public function offsetUnset($offset): void
     {
-        throw new DataTransferObjectException("You can't remove property  in {$this->className}");
+        unset($this->data[$offset]);
     }
     
     public function offsetGet($offset): mixed
     {
         if(!$this->offsetExists($offset)) {
-            throw new DataTransferObjectException("Property \"{$offset}\" does not exist in {$this->className}");
+            throw new DataTransferObjectException("Property \"{$offset}\" does not exist in DTOCollection");
         }
     
         return $this->data[$offset];

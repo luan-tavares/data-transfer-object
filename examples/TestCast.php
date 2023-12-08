@@ -2,19 +2,17 @@
 
 namespace LTL\DataTransferObject\Examples;
 
-use LTL\DataTransferObject\Exceptions\CastDTOException;
+use LTL\DataTransferObject\Exceptions\ValidationDTOException;
 use LTL\DataTransferObject\Interfaces\CastInterface;
 
 class TestCast implements CastInterface
 {
-    public function cast(string $property, mixed $value): array
+    public static function cast(mixed $value): string
     {
-        if($value > 4) {
-            
-            throw new CastDTOException("{$property} is greater 4");
-            
+        if(true) {
+            throw new ValidationDTOException('ERROR_A');
         }
 
-        return $value + 1;
+        return 'a';
     }
 }

@@ -16,15 +16,9 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
 {
     use Enumerable;
 
-    private array|null $errors = null;
-
-    private function __construct()
+    public function __construct(array $data)
     {
-    }
-
-    public static function create(array $data): self
-    {
-        return DTOFactory::build($data, static::class);
+        DTOFactory::build($this, $data);
     }
 
     public function __get($name)
@@ -46,41 +40,18 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
 
     public static function fields(): array
     {
-        $data = [];
-        
         $reflection = new ReflectionClass(static::class);
 
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_READONLY);
 
-        foreach ($properties as $property) {
-            $data[] = $property->name;
-        }
-        
-        return $data;
-    }
-
-    public function errors(): array|null
-    {
-        return $this->errors;
-    }
-
-    public function hasErrors(): bool
-    {
-        return !is_null($this->errors);
-    }
-
-    public function setError(string $property, string $message): void
-    {
-        if(is_null($this->errors)) {
-            $this->errors = [];
-        }
-
-        $this->errors[$property] = $message;
+        return array_map(function (ReflectionProperty $property) {
+            return $property->name;
+        }, $properties);
     }
 
     private function collection(): DTOCollection
     {
-        $collection = new DTOCollection(static::class);
+        $collection = new DTOCollection;
 
         foreach ($this->fields as $field) {
             $collection->push($field, $this->{$field});

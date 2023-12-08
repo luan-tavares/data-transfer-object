@@ -4,15 +4,16 @@ namespace LTL\DataTransferObject\Factories;
 
 use Error;
 use LTL\DataTransferObject\DataTransferObject;
-use LTL\DataTransferObject\Exceptions\CastDTOException;
 use LTL\DataTransferObject\Exceptions\DataTransferObjectException;
+use LTL\DataTransferObject\Exceptions\ValidationDTOException;
 use LTL\DataTransferObject\Interfaces\CastInterface;
+use LTL\DataTransferObject\Interfaces\ValidateInterface;
 use ReflectionClass;
 use ReflectionProperty;
 
 abstract class DTOFactory
 {
-    public static function build(array $data, string $dtoClass): DataTransferObject
+    public static function build(DataTransferObject $object, array $data): void
     {
         set_error_handler(function ($severity, $message, $file, $line) {
             if(error_reporting() === 0) {
@@ -24,21 +25,14 @@ abstract class DTOFactory
             }
         });
 
-        $object = self::resolve($data, $dtoClass);
+        self::resolve($data, $object);
 
         restore_error_handler();
-       
-        return $object;
     }
 
-    private static function resolve(array $data, string $dtoClass): DataTransferObject
+    private static function resolve(array $data, DataTransferObject $object): void
     {
-        $reflection = new ReflectionClass($dtoClass);
-
-        /**
-         * @var DataTransferObject $object
-         */
-        $object = $reflection->newInstanceWithoutConstructor();
+        $reflection = new ReflectionClass($object);
 
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_READONLY);
 
@@ -50,18 +44,16 @@ abstract class DTOFactory
             try {
                 $value = self::setProperty($property, $data);
                 $property->setValue($object, $value);
-            } catch(Error $exception) {
+            } catch(ValidationDTOException $exception) {
                 $errors[$name] = $exception->getMessage();
-            } catch(CastDTOException $exception) {
-                $object->setError($name, $exception->getMessage());
+            } catch(Error $exception) {
+                throw new DataTransferObjectException($exception->getMessage());
             }
         }
 
         if(!empty($errors)) {
-            throw new DataTransferObjectException($errors);
+            throw new ValidationDTOException($errors);
         }
-        
-        return $object;
     }
 
     private static function setProperty(ReflectionProperty $property, array $data): mixed
@@ -80,19 +72,31 @@ abstract class DTOFactory
 
         foreach ($attributes as $attribute) {
              
-            $castClass = $attribute->getName();
-            $reflectionCast = new ReflectionClass($castClass);
+            $attributeName = $attribute->getName();
+            $reflectionAttribute = new ReflectionClass($attributeName);
 
             $castInterface = CastInterface::class;
 
-            if(!$reflectionCast->implementsInterface($castInterface)) {
-                throw new Error("Cast \"{$castClass}\" not implements \"{$castInterface}\".");
+            if($reflectionAttribute->implementsInterface($castInterface)) {
+                /**
+                 * @var CastInterface $attributeName
+                 */
+                $value =  $attributeName::cast($value);
+                continue;
             }
 
-            $objectCast = $reflectionCast->newInstance();
+            $validateInterface = ValidateInterface::class;
 
-            $value =  $objectCast->cast($name, $value);
+            if($reflectionAttribute->implementsInterface($validateInterface)) {
+                /**
+                 * @var ValidateInterface $objectAttribute
+                 */
+                $objectAttribute = $reflectionAttribute->newInstance(...$attribute->getArguments());
+                $objectAttribute->validate($value);
+                continue;
+            }
 
+            throw new Error("Cast \"{$attributeName}\" not implements \"{$castInterface}\" or \"{$validateInterface}\".");
         }
       
         return $value;

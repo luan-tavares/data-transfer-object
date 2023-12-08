@@ -28,14 +28,14 @@
     },
     "bin": [],
     "require": {
-        "php": "^8.2",
-        "luan-tavares/simple-deploy": "^1.0"
+        "php": "^8.2"
     },
     "require-dev": {
         "larapack/dd": "1.*",
         "phpunit/phpunit": "^10",
         "illuminate/collections": "^9",
-        "infection/infection": "^0"
+        "infection/infection": "^0",
+        "luan-tavares/simple-deploy": "^1.0"
     },
     "scripts": {
         "deploy-tag": [
