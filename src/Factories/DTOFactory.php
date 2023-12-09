@@ -15,23 +15,6 @@ abstract class DTOFactory
 {
     public static function build(DataTransferObject $object, array $data): void
     {
-        set_error_handler(function ($severity, $message, $file, $line) {
-            if(error_reporting() === 0) {
-                return;
-            }
-
-            if(error_reporting() & $severity) {
-                throw new DataTransferObjectException($message);
-            }
-        });
-
-        self::resolve($data, $object);
-
-        restore_error_handler();
-    }
-
-    private static function resolve(array $data, DataTransferObject $object): void
-    {
         $reflection = new ReflectionClass($object);
 
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_READONLY);
