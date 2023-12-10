@@ -5,6 +5,7 @@ namespace LTL\DataTransferObject\Factories;
 use Error;
 use LTL\DataTransferObject\DataTransferObject;
 use LTL\DataTransferObject\Exceptions\DataTransferObjectException;
+use LTL\DataTransferObject\Exceptions\NotInitializedDTOException;
 use LTL\DataTransferObject\Exceptions\ValidationDTOException;
 use LTL\DataTransferObject\Interfaces\CastInterface;
 use LTL\DataTransferObject\Interfaces\ValidateInterface;
@@ -20,6 +21,7 @@ abstract class DTOFactory
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_READONLY);
 
         $errors = [];
+        $notInitialized = [];
 
         foreach ($properties as $property) {
             $name = $property->name;
@@ -29,9 +31,17 @@ abstract class DTOFactory
                 $property->setValue($object, $value);
             } catch(ValidationDTOException $exception) {
                 $errors[$name] = $exception->getMessage();
+            } catch(NotInitializedDTOException $exception) {
+                $notInitialized[] = $exception->getMessage();
             } catch(Error $exception) {
                 throw new DataTransferObjectException($exception->getMessage());
             }
+        }
+
+        if(!empty($notInitialized)) {
+            $notInitialized = implode('", "', $notInitialized);
+
+            throw new DataTransferObjectException("Properties \"{$notInitialized}\" must be initialized");
         }
 
         if(!empty($errors)) {
@@ -44,14 +54,12 @@ abstract class DTOFactory
         $name = $property->name;
 
         if(!array_key_exists($name, $data)) {
-            throw new Error('Property not initialized');
+            throw new NotInitializedDTOException($name);
         }
 
         $value = $data[$name];
 
-        if(empty($attributes = $property->getAttributes())) {
-            return $value;
-        }
+        $attributes = $property->getAttributes();
 
         foreach ($attributes as $attribute) {
              

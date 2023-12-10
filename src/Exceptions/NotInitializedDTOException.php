@@ -4,6 +4,6 @@ namespace LTL\DataTransferObject\Exceptions;
 
 use Exception;
 
-class DataTransferObjectException extends Exception
+class NotInitializedDTOException extends Exception
 {
 }

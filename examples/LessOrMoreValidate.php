@@ -14,7 +14,6 @@ class LessOrMoreValidate implements ValidateInterface
     public function validate(mixed $value): void
     {
         if($value < $this->less) {
-            
             throw new ValidationDTOException("LESS_THAN_{$this->less}");
         }
     }
