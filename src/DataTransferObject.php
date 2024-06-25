@@ -53,7 +53,9 @@ abstract class DataTransferObject implements IteratorAggregate, Countable
     {
         $collection = new DTOCollection;
 
-        foreach ($this->fields as $field) {
+        $fields = self::fields();
+
+        foreach ($fields as $field) {
             $collection->push($field, $this->{$field});
         }
 
